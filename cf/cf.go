@@ -56,7 +56,15 @@ func (cf *cf) Add(key string, v interface{}) {
 }
 
 func (cf *cf) Delete(key string) {
-	cf.api.DeleteDNSRecord(cf.zone, key)
+	records, err := cf.api.DNSRecords(cf.zoneID, cloudflare.DNSRecord{})
+	if err != nil {
+		return
+	}
+	for _, record := range records {
+		if record.Content == key {
+			cf.api.DeleteDNSRecord(cf.zone, record.ID)
+		}
+	}
 }
 
 func (cf *cf) Get(key string) interface{} {
